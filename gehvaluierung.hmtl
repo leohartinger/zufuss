@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meine interaktive Karte</title>
+
+    <!-- Verlinkung zu Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+    <style>
+        /* Stil für die Karte: Die Karte soll 600px hoch sein */
+        #map {
+            height: 600px;
+        }
+
+        /* Optional: Etwas Stil für das Formular */
+        form {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Willkommen zu meiner interaktiven Karte!</h1>
+
+    <!-- Formular zur Eingabe von Standortinformationen (optional) -->
+    <form id="locationForm">
+        <label for="location">Standort:</label>
+        <input type="text" id="location" name="location" required>
+        <br>
+        <label for="issue">Problem:</label>
+        <input type="text" id="issue" name="issue" required>
+        <br>
+        <label for="suggestion">Vorschlag:</label>
+        <input type="text" id="suggestion" name="suggestion">
+        <br>
+        <button type="submit">Marker hinzufügen</button>
+    </form>
+
+    <!-- Der Container für die Karte -->
+    <div id="map"></div>
+
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <script>
+        // Initialisieren der Karte
+        const map = L.map('map').setView([47.5162, 14.5501], 7); // Österreich Zentrum
+
+        // Hinzufügen der Kartenkacheln von OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        const markers = []; // Speicher für Marker-Daten
+
+        // Funktion zum Hinzufügen eines Markers
+        const addMarker = (latlng, location, issue, suggestion) => {
+            const marker = L.marker(latlng).addTo(map);
+            const popupContent = `<strong>Standort:</strong> ${location}<br><strong>Problem:</strong> ${issue}<br><strong>Vorschlag:</strong> ${suggestion || 'Keine Angabe'}`;
+            marker.bindPopup(popupContent);
+            markers.push({ latlng, location, issue, suggestion });
+        };
+
+        // Klick auf die Karte -> Koordinaten speichern
+        let currentLatLng = null;
+        map.on('click', function (e) {
+            currentLatLng = e.latlng; // Koordinaten des Klicks
+        });
+
+        // Formular verarbeiten
+        document.getElementById('locationForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            if (!currentLatLng) {
+                alert('Bitte klicken Sie auf die Karte, um den Standort festzulegen.');
+                return;
+            }
+
+            const location = document.getElementById('location').value;
+            const issue = document.getElementById('issue').value;
+            const suggestion = document.getElementById('suggestion').value;
+
+            // Marker hinzufügen
+            addMarker(currentLatLng, location, issue, suggestion);
+
+            // Formular zurücksetzen
+            this.reset();
+            currentLatLng = null; // Koordinaten zurücksetzen
+        });
+    </script>
+</body>
+</html>
